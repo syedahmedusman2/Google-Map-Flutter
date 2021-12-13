@@ -23,7 +23,7 @@ class _LocationTrackingState extends State<LocationTracking> {
   Set<Marker> _marker = Set<Marker>();
   Set<Polyline> _polyline = Set<Polyline>();
   List<LatLng> polylineCoordinates = [];
-  late PolylinePoints polylinePoints;
+  PolylinePoints? polylinePoints;
   late StreamSubscription<LocationData> subscription;
   LocationData? currentLocation;
   late LocationData destinationLocation;
@@ -65,7 +65,7 @@ class _LocationTrackingState extends State<LocationTracking> {
   }
 
   void setPolylinedMap() async {
-    var result = await polylinePoints.getRouteBetweenCoordinates(
+    var result = await polylinePoints!.getRouteBetweenCoordinates(
         GoogleMapApi().url,
         PointLatLng(
             currentLocation!.latitude ?? 0.0, currentLocation!.longitude ?? 0.0),
@@ -112,7 +112,7 @@ class _LocationTrackingState extends State<LocationTracking> {
     CameraPosition initialCameraPosition = CameraPosition(
       target: LatLng(currentLocation!.latitude ?? 0.0, currentLocation!.longitude ?? 0.0),
       zoom: 20,
-      tilt: 80,
+      tilt: 0,
       bearing: 30
     );
    return currentLocation == null
@@ -128,8 +128,9 @@ class _LocationTrackingState extends State<LocationTracking> {
                 myLocationButtonEnabled: true,
                 compassEnabled: true,
                 markers: _marker,
+              
                 polylines: _polyline,
-                mapType: MapType.normal,
+                mapType: MapType.satellite,
                 initialCameraPosition: initialCameraPosition,
                 onMapCreated: (GoogleMapController controller) {
                   _controller.complete(controller);
