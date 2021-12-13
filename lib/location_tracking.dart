@@ -7,9 +7,8 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 
-
 class LocationTracking extends StatefulWidget {
-  const LocationTracking({ Key? key }) : super(key: key);
+  const LocationTracking({Key? key}) : super(key: key);
 
   @override
   _LocationTrackingState createState() => _LocationTrackingState();
@@ -24,23 +23,30 @@ class _LocationTrackingState extends State<LocationTracking> {
   Set<Polyline> _polyline = Set<Polyline>();
   List<LatLng> polylineCoordinates = [];
   late PolylinePoints polylinePoints;
-  late StreamSubscription<LocationData> _locationSubscription;
+  late StreamSubscription<LocationData> subscription;
   late LocationData currentLocation;
   late LocationData destinationLocation;
   late Location location;
   @override
-  void initState(){
+  void initState() {
     super.initState();
     location = Location();
     polylinePoints = PolylinePoints();
+    subscription=location.onLocationChanged.listen((LocationData cLoc) {
+      currentLocation = cLoc;
+      // updatePinsOnMap();
+    });
+  }
+  void setInitialLocation()async{
     
   }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
         body: GoogleMap(
-          initialCameraPosition:CameraPosition(
+          initialCameraPosition: CameraPosition(
             target: sourceLocation,
             zoom: 20,
           ),
