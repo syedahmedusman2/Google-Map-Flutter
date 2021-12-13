@@ -36,7 +36,7 @@ class _LocationTrackingState extends State<LocationTracking> {
     subscription = location.onLocationChanged.listen((LocationData cLoc) {
       currentLocation = cLoc;
       setInitialLocation();
-      // updatePinsOnMap();
+     updatePinsOnMao();
     });
   }
 
@@ -61,6 +61,7 @@ class _LocationTrackingState extends State<LocationTracking> {
       markerId: MarkerId("destinationPosition"),
       position: destinationPosition,
     ));
+    setPolylinedMap();
   }
 
   void setPolylinedMap() async {
@@ -76,17 +77,55 @@ class _LocationTrackingState extends State<LocationTracking> {
             .add(LatLng(pointLatLng.latitude, pointLatLng.longitude));
       });
     }
+    setState(() {
+      _polyline.add(Polyline(
+          polylineId: PolylineId("polyline"),
+          width: 4,
+          points: polylineCoordinates,
+          color: Colors.red));
+    });
+  }
+  void updatePinsOnMao()async{
+    CameraPosition initialCameraPosition = CameraPosition(
+      target: LatLng(currentLocation.latitude ?? 0.0, currentLocation.longitude ?? 0.0),
+      zoom: 20,
+      tilt: 80,
+      bearing: 30
+    );
+    final GoogleMapController controller = await _controller.future;
+    controller.animateCamera(CameraUpdate.newCameraPosition(initialCameraPosition));
+    var sourcePosition = LatLng(
+        currentLocation.latitude ?? 0.0, currentLocation.longitude ?? 0.0);
+        setState(() {
+        _marker.removeWhere((marker) => marker.markerId.value == 'sourcePosition');
+        _marker.add(Marker(
+          markerId: MarkerId("sourcePosition"),
+          position: sourcePosition,
+        
+        ));
+          
+        });
   }
 
   @override
   Widget build(BuildContext context) {
+    CameraPosition initialCameraPosition = CameraPosition(
+      target: LatLng(currentLocation.latitude ?? 0.0, currentLocation.longitude ?? 0.0),
+      zoom: 20,
+      tilt: 80,
+      bearing: 30
+    );
     return SafeArea(
       child: Scaffold(
         body: GoogleMap(
-          initialCameraPosition: CameraPosition(
-            target: sourceLocation,
-            zoom: 20,
-          ),
+          markers: _marker,
+          polylines: _polyline,
+          mapType: MapType.normal,
+          initialCameraPosition:initialCameraPosition,
+          onMapCreated: (GoogleMapController controller) {
+            _controller.complete(controller);
+            showLocationPins();
+          },
         ),
       ),
     );
