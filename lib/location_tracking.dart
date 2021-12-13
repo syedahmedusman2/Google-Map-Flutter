@@ -34,11 +34,19 @@ class _LocationTrackingState extends State<LocationTracking> {
     polylinePoints = PolylinePoints();
     subscription=location.onLocationChanged.listen((LocationData cLoc) {
       currentLocation = cLoc;
+      setInitialLocation();
       // updatePinsOnMap();
     });
   }
   void setInitialLocation()async{
-    
+    currentLocation = await location.getLocation();
+    destinationLocation = LocationData.fromMap({
+      "latitude": destinationLatlng.latitude,
+      "longitude": destinationLatlng.longitude
+    });
+  }
+  void showLocationPins(){
+    var sourcePosition = LatLng(currentLocation.latitude??0.0, currentLocation.longitude??0.0);
   }
 
   @override
