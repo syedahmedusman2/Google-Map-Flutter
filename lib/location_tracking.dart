@@ -25,7 +25,7 @@ class _LocationTrackingState extends State<LocationTracking> {
   List<LatLng> polylineCoordinates = [];
   late PolylinePoints polylinePoints;
   late StreamSubscription<LocationData> subscription;
-  late LocationData currentLocation;
+  LocationData? currentLocation;
   late LocationData destinationLocation;
   late Location location;
   @override
@@ -50,7 +50,7 @@ class _LocationTrackingState extends State<LocationTracking> {
 
   void showLocationPins() {
     var sourcePosition = LatLng(
-        currentLocation.latitude ?? 0.0, currentLocation.longitude ?? 0.0);
+        currentLocation!.latitude ?? 0.0, currentLocation!.longitude ?? 0.0);
     var destinationPosition = LatLng(destinationLocation.latitude ?? 0.0,
         destinationLocation.longitude ?? 0.0);
     _marker.add(Marker(
@@ -68,7 +68,7 @@ class _LocationTrackingState extends State<LocationTracking> {
     var result = await polylinePoints.getRouteBetweenCoordinates(
         GoogleMapApi().url,
         PointLatLng(
-            currentLocation.latitude ?? 0.0, currentLocation.longitude ?? 0.0),
+            currentLocation!.latitude ?? 0.0, currentLocation!.longitude ?? 0.0),
         PointLatLng(destinationLocation.latitude ?? 0.0,
             destinationLocation.longitude ?? 0.0));
     if (result.points.isNotEmpty) {
@@ -87,7 +87,7 @@ class _LocationTrackingState extends State<LocationTracking> {
   }
   void updatePinsOnMao()async{
     CameraPosition initialCameraPosition = CameraPosition(
-      target: LatLng(currentLocation.latitude ?? 0.0, currentLocation.longitude ?? 0.0),
+      target: LatLng(currentLocation!.latitude ?? 0.0, currentLocation!.longitude ?? 0.0),
       zoom: 20,
       tilt: 80,
       bearing: 30
@@ -95,7 +95,7 @@ class _LocationTrackingState extends State<LocationTracking> {
     final GoogleMapController controller = await _controller.future;
     controller.animateCamera(CameraUpdate.newCameraPosition(initialCameraPosition));
     var sourcePosition = LatLng(
-        currentLocation.latitude ?? 0.0, currentLocation.longitude ?? 0.0);
+        currentLocation!.latitude ?? 0.0, currentLocation!.longitude ?? 0.0);
         setState(() {
         _marker.removeWhere((marker) => marker.markerId.value == 'sourcePosition');
         _marker.add(Marker(
@@ -110,24 +110,40 @@ class _LocationTrackingState extends State<LocationTracking> {
   @override
   Widget build(BuildContext context) {
     CameraPosition initialCameraPosition = CameraPosition(
-      target: LatLng(currentLocation.latitude ?? 0.0, currentLocation.longitude ?? 0.0),
+      target: LatLng(currentLocation!.latitude ?? 0.0, currentLocation!.longitude ?? 0.0),
       zoom: 20,
       tilt: 80,
       bearing: 30
     );
-    return SafeArea(
-      child: Scaffold(
-        body: GoogleMap(
-          markers: _marker,
-          polylines: _polyline,
-          mapType: MapType.normal,
-          initialCameraPosition:initialCameraPosition,
-          onMapCreated: (GoogleMapController controller) {
-            _controller.complete(controller);
-            showLocationPins();
-          },
-        ),
-      ),
-    );
+   return currentLocation == null
+        ? Container(
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            alignment: Alignment.center,
+            child: CircularProgressIndicator(),
+          )
+        : SafeArea(
+            child: Scaffold(
+              body: GoogleMap(
+                myLocationButtonEnabled: true,
+                compassEnabled: true,
+                markers: _marker,
+                polylines: _polyline,
+                mapType: MapType.normal,
+                initialCameraPosition: initialCameraPosition,
+                onMapCreated: (GoogleMapController controller) {
+                  _controller.complete(controller);
+
+                  showLocationPins();
+                },
+              ),
+            ),
+          );
+  }
+
+  @override
+  void dispose() {
+    subscription.cancel();
+    super.dispose();
   }
 }
