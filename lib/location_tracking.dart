@@ -64,12 +64,18 @@ class _LocationTrackingState extends State<LocationTracking> {
   }
 
   void setPolylinedMap() async {
-    var result = polylinePoints.getRouteBetweenCoordinates(
+    var result = await polylinePoints.getRouteBetweenCoordinates(
         GoogleMapApi().url,
         PointLatLng(
             currentLocation.latitude ?? 0.0, currentLocation.longitude ?? 0.0),
         PointLatLng(destinationLocation.latitude ?? 0.0,
             destinationLocation.longitude ?? 0.0));
+    if (result.points.isNotEmpty) {
+      result.points.forEach((pointLatLng) {
+        polylineCoordinates
+            .add(LatLng(pointLatLng.latitude, pointLatLng.longitude));
+      });
+    }
   }
 
   @override
