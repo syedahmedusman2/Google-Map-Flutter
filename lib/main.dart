@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:googlemap/homepage.dart';
+import 'package:googlemap/location_tracking.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,7 +17,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
        primarySwatch: Colors.blue,
       ),
-      home: const Homepage()
+      home: LocationTracking()
     );
   }
 }
